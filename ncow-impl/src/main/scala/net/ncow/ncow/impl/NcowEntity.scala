@@ -6,6 +6,7 @@ import akka.Done
 import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag, PersistentEntity}
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
+import net.ncow.ncow.api.RegisterBotResponse
 import play.api.libs.json.{Format, Json}
 
 import scala.collection.immutable.Seq
@@ -127,6 +128,8 @@ object GreetingMessageChanged {
   * This interface defines all the commands that the HelloWorld entity supports.
   */
 sealed trait NcowCommand[R] extends ReplyType[R]
+
+case class RegisterBotCommand(name: String) extends NcowCommand[RegisterBotResponse]
 
 /**
   * A command to switch the greeting message.
