@@ -1,34 +1,33 @@
 package net.ncow.ncow.api
 
 import akka.{Done, NotUsed}
-import com.lightbend.lagom.scaladsl.api.broker.Topic
-import com.lightbend.lagom.scaladsl.api.broker.kafka.{KafkaProperties, PartitionKeyStrategy}
+import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 import play.api.libs.json.{Format, Json}
-import com.lightbend.lagom.scaladsl.api.transport.Method
 
 trait NcowService extends Service {
 
-  def registerBot(botRegistrationRequest: BotRegistrationRequest): ServiceCall[BotRegistrationRequest, BotRegistrationResponse]
+  def registerBot: ServiceCall[RegisterBotRequest, RegisterBotResponse]
 
   override final def descriptor = {
     import Service._
+    // @formatter:off
     named("ncow")
       .withCalls(
-        restCall(Method.POST, "/bot/register", registerBot _)
+        restCall(Method.POST, "/bot/register/", registerBot _)
       )
       .withAutoAcl(true)
+    // @formatter:on
   }
 }
 
-case class BotRegistrationRequest(name: String)
+case class RegisterBotRequest(name: String)
 
-object BotRegistrationRequest {
-  implicit val format: Format[BotRegistrationRequest] = Json.format[BotRegistrationRequest]
+object RegisterBotRequest {
+  implicit val format: Format[RegisterBotRequest] = Json.format[RegisterBotRequest]
 }
 
-case class BotRegistrationResponse(key: String)
-
-object BotRegistrationResponse {
-  implicit val format: Format[BotRegistrationResponse] = Json.format[BotRegistrationResponse]
+case class RegisterBotResponse(key: String)
+object RegisterBotResponse {
+  implicit  val format: Format[RegisterBotResponse] = Json.format[RegisterBotResponse]
 }
