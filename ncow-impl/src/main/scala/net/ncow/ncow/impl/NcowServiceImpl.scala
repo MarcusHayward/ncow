@@ -1,7 +1,10 @@
 package net.ncow.ncow.impl
 
+import java.util.UUID
+
+import akka.{Done, NotUsed}
 import net.ncow.ncow.api
-import net.ncow.ncow.api.{NcowService}
+import net.ncow.ncow.api.{NcowService, RegisterBotRequest, RegisterBotResponse}
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.broker.TopicProducer
@@ -11,34 +14,9 @@ import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, PersistentE
   * Implementation of the NcowService.
   */
 class NcowServiceImpl(persistentEntityRegistry: PersistentEntityRegistry) extends NcowService {
+  def registerBot: ServiceCall[RegisterBotRequest, RegisterBotResponse] = ServiceCall { request: RegisterBotRequest =>
+    val ref = persistentEntityRegistry.refFor[NcowEntity] (UUID.randomUUID().toString)
 
-  override def hello(id: String) = ServiceCall { _ =>
-    // Look up the ncow entity for the given ID.
-    val ref = persistentEntityRegistry.refFor[NcowEntity](id)
-
-    // Ask the entity the Hello command.
-    ref.ask(Hello(id))
-  }
-
-  override def useGreeting(id: String) = ServiceCall { request =>
-    // Look up the ncow entity for the given ID.
-    val ref = persistentEntityRegistry.refFor[NcowEntity](id)
-
-    // Tell the entity to use the greeting message specified.
-    ref.ask(UseGreetingMessage(request.message))
-  }
-
-
-  override def greetingsTopic(): Topic[api.GreetingMessageChanged] =
-    TopicProducer.singleStreamWithOffset {
-      fromOffset =>
-        persistentEntityRegistry.eventStream(NcowEvent.Tag, fromOffset)
-          .map(ev => (convertEvent(ev), ev.offset))
-    }
-
-  private def convertEvent(helloEvent: EventStreamElement[NcowEvent]): api.GreetingMessageChanged = {
-    helloEvent.event match {
-      case GreetingMessageChanged(msg) => api.GreetingMessageChanged(helloEvent.entityId, msg)
-    }
+    ref.ask(RegisterBotCommand(request.name))
   }
 }
